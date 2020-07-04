@@ -1,4 +1,4 @@
-package main
+package RateLimiter
 
 import (
 	"log"
@@ -12,7 +12,7 @@ import (
 )
 
 // set limmiter allow 1 request every 20 second on from IP
-var limiter = limit.NewIPRateLimiter(rate.Every(20*time.Second), 1)
+var limiter = SetParam(20, 1)
 
 func main() {
 	mux := http.NewServeMux()
@@ -20,16 +20,16 @@ func main() {
 
 	addr := "192.168.8.101:9999"
 	log.Printf("listining: %s\n", addr)
-	if err := http.ListenAndServe(addr, limitMiddleware(mux)); err != nil {
+	if err := http.ListenAndServe(addr, LimitMiddleware(mux)); err != nil {
 		log.Fatalf("can' t start: %s", err.Error())
 	}
 }
 
-func limitMiddleware(next http.Handler) http.Handler {
+func LimitMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		limiter := limiter.GetLimiter(getIPFromRemoteAddr(r.RemoteAddr))
+		getLimiter := limiter.GetLimiter(getIPFromRemoteAddr(r.RemoteAddr))
 
-		if !limiter.Allow() {
+		if !getLimiter.Allow() {
 			http.Error(w, http.StatusText(http.StatusTooManyRequests), http.StatusTooManyRequests)
 			return
 		}
@@ -49,4 +49,10 @@ func getIPFromRemoteAddr(remoteAddr string) (ip string) {
 	trim := strings.Split(remoteAddr, ":")
 	ip = trim[0]
 	return
+}
+
+func SetParam(timer time.Duration, count int) *limit.IPRateLimiter {
+	limiterFromParam := limit.NewIPRateLimiter(rate.Every(timer * time.Second), count)
+
+	return limiterFromParam
 }
