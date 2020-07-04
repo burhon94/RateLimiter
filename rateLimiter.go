@@ -52,7 +52,7 @@ func getIPFromRemoteAddr(remoteAddr string) (ip string) {
 }
 
 func SetParam(timer time.Duration, count int) *limit.IPRateLimiter {
-	limiterFromParam := limit.NewIPRateLimiter(rate.Every(timer * time.Second), count)
+	limiterFromParam := limit.NewIPRateLimiter(rate.Every(timer*time.Second), count)
 
 	return limiterFromParam
 }
