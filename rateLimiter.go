@@ -1,7 +1,6 @@
 package RateLimiter
 
 import (
-	"log"
 	"net/http"
 	"strings"
 	"time"
@@ -11,21 +10,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-// set limmiter allow 1 request every 20 second on from IP
-var limiter = SetParam(20, 1)
-
-func main() {
-	mux := http.NewServeMux()
-	mux.HandleFunc("/", okHandler)
-
-	addr := "192.168.8.101:9999"
-	log.Printf("listining: %s\n", addr)
-	if err := http.ListenAndServe(addr, LimitMiddleware(mux)); err != nil {
-		log.Fatalf("can' t start: %s", err.Error())
-	}
-}
-
-func LimitMiddleware(next http.Handler) http.Handler {
+func LimitMiddleware(next http.Handler, limiter *limit.IPRateLimiter) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		getLimiter := limiter.GetLimiter(getIPFromRemoteAddr(r.RemoteAddr))
 
@@ -36,13 +21,6 @@ func LimitMiddleware(next http.Handler) http.Handler {
 
 		next.ServeHTTP(w, r)
 	})
-}
-
-func okHandler(w http.ResponseWriter, r *http.Request) {
-	ip := getIPFromRemoteAddr(r.RemoteAddr)
-	log.Printf("ip: %s\n", ip)
-
-	w.Write([]byte("status OK"))
 }
 
 func getIPFromRemoteAddr(remoteAddr string) (ip string) {
