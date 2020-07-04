@@ -1,12 +1,14 @@
 package main
 
 import (
-	"golang.org/x/time/rate"
 	"log"
 	"net/http"
-	"rateLimit/limiter/limit"
 	"strings"
 	"time"
+
+	"github.com/burhon94/RateLimiter/limiter/limit"
+
+	"golang.org/x/time/rate"
 )
 
 // set limmiter allow 1 request every 20 second on from IP

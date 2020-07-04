@@ -1,4 +1,4 @@
-module https://github.com/burhon94/RateLimiter
+module github.com/burhon94/RateLimiter
 
 go 1.13
 
